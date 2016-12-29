@@ -10,6 +10,36 @@ var version = "1.0.1";
 //初始化项目结构
 var mkdirp = require('mkdirp');
 var fs = require('fs');
+
+var moduledir={
+	srcPages:'./src/pages/',
+	srcJS : './src/js/', //JS生产目录
+	srcLess : './src/less/', //less源文件目录
+	srcCss :'./src/css/', //less源文件目录
+	srcCSSbase : './src/less/base', //less源文件目录
+	srcCSScomp : './src/less/components', //less源文件目录
+	srcCSScomp : './src/less/components', //less源文件目录
+	srcCSSmixin : './src/less/base/mixin', //less源文件目录
+	srcFont : './src/fonts/', //字体图标源文件目录 
+	srcImage : './src/img/', //图片源文件目录
+	libs :'./libs', //生产目录
+	test : './test', //生产目录
+	doc : './doc', //生产目录doc
+	dest : './dist'; //生产目录
+}
+var files={
+	srcCSSbutton : './src/less/components/button.less', //less源
+	srcCSSinput : './src/less/components/input.less', //less源文件
+	srcCSScombine : './src/less/style.less', //less源文件目录
+	srcCSSvars : './src/less/base/variables.less', //less源文件目录
+	srcCSSreset : './src/less/base/reset.less', //less源文件目录
+	srcCSSglobal : './src/less/base/global.less', //less源文件目录
+	srcCSSgrid : './src/less/base/grid.less', //less源文件目录
+readme : './README.md'; //生产目录
+//bowermodule="./dist/lib" //依赖资源文档的目录
+bowermoduleFile : "./.bowerrc";
+gitignore : './.gitignore'; //生产目录
+}
 var srcPages = './src/pages/', //页面源文件目录
 	srcJS = './src/js/', //JS生产目录
 	srcLess = './src/less/', //less源文件目录
@@ -32,26 +62,39 @@ var srcPages = './src/pages/', //页面源文件目录
 	test = './test', //生产目录
 	doc = './doc', //生产目录doc
 	dest = './dist'; //生产目录
-	readme = './README.md'; //生产目录
-	gitignore = './.gitignore'; //生产目录
-
-var dirs = [srcPages, srcJS, srcLess, srcCss, srcCSSbase,srcCSSmixin, srcCSScomp, srcFont,  srcImage, libs, test, doc, dest];
-var fsfiles = [srcCSSinput,srcCSSbutton, srcCSScombine, srcCSSvars, srcCSSreset, srcCSSglobal, srcCSSgrid, gitignore,readme];
+readme = './README.md'; //生产目录
+//bowermodule="./dist/lib" //依赖资源文档的目录
+bowermoduleFile = "./.bowerrc";
+gitignore = './.gitignore'; //生产目录
+//添加到数组当中
+var dirs = [srcPages, srcJS, srcLess, srcCss, srcCSSbase, srcCSSmixin, srcCSScomp, srcFont, srcImage, libs, test, doc, dest];
+var fsfiles = [srcCSSinput, srcCSSbutton, srcCSScombine, srcCSSvars, srcCSSreset, srcCSSglobal, srcCSSgrid, gitignore, readme,bowermoduleFile];
 //初始化目录结构
 gulp.task("initdir", function() {
-	dirs.forEach(function(e) {
-		mkdirp(e, function(err) {
-			if(err) console.error(err);
-			else console.log(e + " was created!");
-		});
+		dirs.forEach(function(e) {
+			mkdirp(e, function(err) {
+				if(err) console.error(err);
+				else console.log(e + " was created!");
+			});
+		})
 	})
-})
-//初始化文件  书写多行内容 后面添加
+	//初始化文件  书写多行内容 后面添加
 gulp.task("initfile", function() {
 	fsfiles.forEach(function(e) {
-		var initStr="";
-		if(e=="./.gitignore")initStr="node_modules";
-		fs.writeFile(e,initStr , function(err) {
+		var initStr;
+		switch(e) {
+			case "./.gitignore":
+				initStr = "node_modules";
+				break;
+			case "./.bowerrc":
+				initStr = '{"directory" : "libs"}';
+				break;
+			default:
+				initStr = "";
+				break
+
+		}
+		fs.writeFile(e, initStr, function(err) {
 			if(err) {
 				return console.log(err);
 			} else console.log(e + " was saved!");
@@ -129,15 +172,15 @@ gulp.task("build:js", ["deljs"], function() {
 });
 //删除清空不必要的html文件
 gulp.task("delhtml", function() {
-	return gulp.src("dist/html/**/*")
+	return gulp.src("dist/pages/**/*")
 		.pipe($.htmlclean())
 		.pipe($.vinylPaths($.del));
 });
 //拷贝页面文件
 var htmlclean = require('gulp-htmlclean');
 gulp.task("build:copyhtmldir", ["delhtml"], function() {
-	return gulp.src(['src/view/**/*'])
-		.pipe(gulp.dest('dist/html'));
+	return gulp.src(['src/pages/**/*'])
+		.pipe(gulp.dest('dist/pages'));
 });
 //编译发布过程,所有任务异步执行
 gulp.task("build", ["build:css", "build:js", "build:imgmin", "build:copyhtmldir"], function() {
